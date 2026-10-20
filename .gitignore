@@ -1,0 +1,6 @@
+.trae/
+.trae-html-share-packages/
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307080a'/%3E%3Ctext x='32' y='44' font-size='30' font-family='monospace' fill='%23ff4b2f' text-anchor='middle'%3EP0%3C/text%3E%3C/svg%3E">
+<title>P0 事故剧本杀 · 谁动了生产库</title>
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg" id="bg" data-bg="server"></div>
+  <div class="scanline"></div>
+  <div class="noise"></div>
+  <div class="stage-label">OPSPILOT / WAR ROOM / 03:08</div>
+
+  <!-- 背景事件墙 -->
+  <div class="wall" aria-hidden="true">
+    <div class="wall-p0">P0</div>
+    <div class="wall-line"></div>
+    <div class="wall-sub"><span class="dot"></span>PROD_MAIN / NOT FOUND</div>
+    <div class="wall-meta">03:07:12 · 2,700,000 ORDERS · 8 AGENTS ONLINE</div>
+  </div>
+
+  <!-- 顶栏 -->
+  <header class="topbar" id="topbar">
+    <div class="case-id">CASE <b>P0-1024</b> · 生产库失踪案</div>
+    <div class="timer-wrap">
+      <div class="timer" id="timer">1024</div>
+      <div class="timer-unit">秒</div>
+      <div class="tbar" id="tbar"><i id="tbarFill"></i></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="meta">线索 <b id="clueCount">0 / 16</b></div>
+    <button class="icon-btn cheat" id="btnCheat">作弊 · 看谁的真相</button>
+    <button class="icon-btn" id="btnClues">线索</button>
+    <button class="icon-btn" id="btnLog">记录</button>
+    <button class="icon-btn" id="btnSound">声音 ON</button>
+    <button class="icon-btn" id="btnAuto">自动 OFF</button>
+  </header>
+
+  <!-- 立绘 -->
+  <div class="portrait-wrap" id="portraitWrap">
+    <div class="glow"></div>
+    <img class="portrait" id="portrait" alt="">
+  </div>
+
+  <!-- 右侧 Agent 轮播 -->
+  <aside class="rail" id="agentRail">
+    <div class="rail-head">AGENTS<b>08</b></div>
+    <div class="rail-window">
+      <div class="rail-track" id="railTrack"></div>
+    </div>
+    <div class="rail-info">
+      <div class="rail-name" id="railName">—</div>
+      <div class="rail-duty" id="railDuty"></div>
+    </div>
+    <div class="rail-dots" id="railDots"></div>
+  </aside>
+
+  <!-- 选项 -->
+  <div class="choices" id="choices"></div>
+
+  <!-- 对话框 -->
+  <div class="dialogue" id="dialogue">
+    <div class="dlg-inner">
+      <div class="name-row">
+        <div class="nameplate" id="nameplate"></div>
+        <div class="role-tag" id="roleTag"></div>
+        <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="dlg-text" id="text"></div>
+      <div class="dlg-hint">
+        <span id="hintTap">点击继续 · CLICK / SPACE</span>
+        <span id="hintAuto">AUTO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 标题页 -->
+  <section class="title-screen" id="title">
+    <div class="bootlog" id="bootlog">
+      <div style="animation-delay:.1s">[03:07:11]  POST ................ <span class="ok">OK</span></div>
+      <div style="animation-delay:.35s">[03:07:12]  prod_main ............ <span style="color:#ff4b2f">NOT FOUND</span></div>
+      <div style="animation-delay:.6s">[03:07:12]  8 agents online ....... <span class="ok">OK</span></div>
+      <div style="animation-delay:.85s">[03:08:00]  on-call engineer ...... <span class="ok">YOU</span></div>
+    </div>
+    <div class="title-clock">1024<span class="title-unit">秒</span></div>
+    <div class="title-caption">事故发生在 03:07:12。从现在起，你只有 1024 秒。</div>
+    <h1 class="title-main">生产库<em>没了</em>。<br>你抓谁？</h1>
+    <p class="title-sub">
+      8 个 AI Agent，1 个真相，<b>1024 秒</b>。<br>
+      每个选项都会消耗时间。每个 Agent 都藏着话。
+    </p>
+    <div class="start-row">
+      <button class="btn-start" id="btnStart">接 手 这 个 夜 班</button>
+      <span class="title-note">建议戴耳机 · 点击任意选项推进剧情</span>
+    </div>
+    <div class="title-unlock" id="titleUnlock"></div>
+    <div class="title-foot">
+      <span>1024 BUILDER · 作品秀</span>
+      <span>SINGLE FILE / OFFLINE / WEB AUDIO</span>
+    </div>
+  </section>
+
+  <!-- 通用覆盖层 -->
+  <div class="overlay" id="overlay">
+    <div class="panel" id="panel"></div>
+  </div>
+
+  <!-- 支撑线索选择 -->
+  <div class="overlay" id="supportOverlay">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>选择 3 条支撑线索</h3>
+        <button class="x" id="supportClose">×</button>
+      </div>
+      <div class="panel-body">
+        <div class="support-bar">已选 <b id="supportCount">0</b> / 3 · 线索越完整，结案评级越高</div>
+        <div class="support-grid" id="supportGrid"></div>
+        <button class="accuse-btn" id="supportConfirm" disabled>提 交 结 案</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>
