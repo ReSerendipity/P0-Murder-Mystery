@@ -261,6 +261,7 @@ function showScene(scene) {
   if (wall) wall.style.opacity = (scene.wall === false || scene.portrait) ? "0" : "1";
   if (scene.portrait !== undefined) setPortrait(scene.portrait);
   choicesEl.classList.remove("on");
+  document.getElementById("stage").classList.remove("choosing");
   choicesEl.classList.toggle("grid", !!scene.grid);
   choicesEl.innerHTML = "";
   dialogue.classList.add("on");
@@ -339,6 +340,7 @@ function showChoices(list) {
     choicesEl.appendChild(b);
   });
   choicesEl.classList.add("on");
+  document.getElementById("stage").classList.add("choosing");
   if (choicesEl.scrollHeight > choicesEl.clientHeight + 6) {
     const h = document.createElement("div");
     h.className = "scroll-hint";
@@ -356,6 +358,7 @@ function showChoices(list) {
 function choose(c) {
   if (STATE.ended || !c || c.locked || c.done) return;
   SFX.tone(880, 0.04, "sine", 0.04);
+  document.getElementById("stage").classList.remove("choosing");
   choicesEl.classList.remove("on");
   choicesEl.innerHTML = "";
   if (c.cost) { spend(c.cost); if (STATE.ended) return; }
@@ -1040,6 +1043,50 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+/* ---------- 封面右侧 Agent 轮播 ---------- */
+const COVER = { i: 0, timer: null, paused: false };
+function coverShow(i, user) {
+  const img = $("coverPortrait");
+  if (!img) return;
+  COVER.i = i;
+  const a = AGENTS[i];
+  const isAvatar = a.id === "豆包";
+  img.classList.remove("in");
+  img.classList.toggle("round", isAvatar);
+  img.src = a.px;
+  void img.offsetWidth;      // 强制回流，确保过渡生效
+  img.classList.add("in");
+  $("coverName").textContent = a.id;
+  $("coverDuty").textContent = a.duty;
+  $("coverIdx").textContent = String(i + 1).padStart(2, "0") + " / 08";
+  document.querySelectorAll(".cover-thumb").forEach((el, k) => el.classList.toggle("on", k === i));
+  if (user) SFX.tone(760, 0.04, "sine", 0.02);
+}
+function initCover() {
+  const thumbs = $("coverThumbs");
+  if (!thumbs) return;
+  thumbs.innerHTML = AGENTS.map((a, i) =>
+    '<button class="cover-thumb" data-i="' + i + '" aria-label="' + a.id + '"><img src="' + a.px + '" alt=""></button>'
+  ).join("");
+  thumbs.querySelectorAll(".cover-thumb").forEach((el) => {
+    el.onclick = (ev) => {
+      ev.stopPropagation();
+      coverShow(Number(el.dataset.i), true);
+    };
+  });
+  coverShow(0, false);
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  COVER.timer = setInterval(() => {
+    if (COVER.paused || document.hidden || STATE.started) return;
+    coverShow((COVER.i + 1) % AGENTS.length, false);
+  }, 2800);
+  const box = $("coverAgent");
+  if (box) {
+    box.addEventListener("mouseenter", () => { COVER.paused = true; });
+    box.addEventListener("mouseleave", () => { COVER.paused = false; });
+  }
+}
+
 /* ---------- 右侧 Agent 轮播 ---------- */
 const RAIL = { index: 0, timer: null, paused: false, built: false };
 function buildRail() {
@@ -1098,4 +1145,5 @@ function initRail() {
 
 renderTimer();
 renderTitleUnlock();
+initCover();
 initRail();

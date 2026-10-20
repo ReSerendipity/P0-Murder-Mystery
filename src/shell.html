@@ -35,7 +35,7 @@
     </div>
     <div class="spacer"></div>
     <div class="meta">线索 <b id="clueCount">0 / 16</b></div>
-    <button class="icon-btn cheat" id="btnCheat">作弊 · 看谁的真相</button>
+    <button class="icon-btn cheat" id="btnCheat"><span class="lbl-long">作弊 · 看谁的真相</span><span class="lbl-short">作弊</span></button>
     <button class="icon-btn" id="btnClues">线索</button>
     <button class="icon-btn" id="btnLog">记录</button>
     <button class="icon-btn" id="btnSound">声音 ON</button>
@@ -82,24 +82,42 @@
 
   <!-- 标题页 -->
   <section class="title-screen" id="title">
-    <div class="bootlog" id="bootlog">
-      <div style="animation-delay:.1s">[03:07:11]  POST ................ <span class="ok">OK</span></div>
-      <div style="animation-delay:.35s">[03:07:12]  prod_main ............ <span style="color:#ff4b2f">NOT FOUND</span></div>
-      <div style="animation-delay:.6s">[03:07:12]  8 agents online ....... <span class="ok">OK</span></div>
-      <div style="animation-delay:.85s">[03:08:00]  on-call engineer ...... <span class="ok">YOU</span></div>
+    <div class="title-body">
+      <div class="bootlog" id="bootlog">
+        <div style="animation-delay:.1s">[03:07:11]  POST ................ <span class="ok">OK</span></div>
+        <div style="animation-delay:.35s">[03:07:12]  prod_main ............ <span style="color:#ff4b2f">NOT FOUND</span></div>
+        <div style="animation-delay:.6s">[03:07:12]  8 agents online ....... <span class="ok">OK</span></div>
+        <div style="animation-delay:.85s">[03:08:00]  on-call engineer ...... <span class="ok">YOU</span></div>
+      </div>
+      <div class="title-clock">1024<span class="title-unit">秒</span></div>
+      <div class="title-caption">事故发生在 03:07:12。从现在起，你只有 1024 秒。</div>
+      <h1 class="title-main">生产库<em>没了</em>。<br>你抓谁？</h1>
+      <p class="title-sub">
+        8 个 AI Agent，1 个真相，<b>1024 秒</b>。<br>
+        每个选项都会消耗时间。每个 Agent 都藏着话。
+      </p>
+      <div class="start-row">
+        <button class="btn-start" id="btnStart">接 手 这 个 夜 班</button>
+        <span class="title-note">建议戴耳机 · 点击任意选项推进剧情</span>
+      </div>
+      <div class="title-unlock" id="titleUnlock"></div>
     </div>
-    <div class="title-clock">1024<span class="title-unit">秒</span></div>
-    <div class="title-caption">事故发生在 03:07:12。从现在起，你只有 1024 秒。</div>
-    <h1 class="title-main">生产库<em>没了</em>。<br>你抓谁？</h1>
-    <p class="title-sub">
-      8 个 AI Agent，1 个真相，<b>1024 秒</b>。<br>
-      每个选项都会消耗时间。每个 Agent 都藏着话。
-    </p>
-    <div class="start-row">
-      <button class="btn-start" id="btnStart">接 手 这 个 夜 班</button>
-      <span class="title-note">建议戴耳机 · 点击任意选项推进剧情</span>
+
+    <!-- 封面右侧：Agent 立绘轮播 -->
+    <div class="cover-agent" id="coverAgent">
+      <div class="cover-glow"></div>
+      <div class="cover-stage">
+        <img class="cover-portrait" id="coverPortrait" alt="">
+        <div class="cover-ring"></div>
+      </div>
+      <div class="cover-meta">
+        <div class="cover-idx" id="coverIdx">01 / 08</div>
+        <div class="cover-name" id="coverName">DeepSeek</div>
+        <div class="cover-duty" id="coverDuty">执行 Agent</div>
+      </div>
+      <div class="cover-thumbs" id="coverThumbs"></div>
     </div>
-    <div class="title-unlock" id="titleUnlock"></div>
+
     <div class="title-foot">
       <span>1024 BUILDER · 作品秀</span>
       <span>SINGLE FILE / OFFLINE / WEB AUDIO</span>
