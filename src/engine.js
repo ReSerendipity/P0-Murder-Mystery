@@ -377,16 +377,55 @@ function choose(c) {
 /* ---------- 序章 ---------- */
 function showPrologue(i) {
   const p = PROLOGUE[i];
+  const choices = i === 0
+    ? [
+        { label: "先给我讲讲发生了什么（30 秒白话版）", action: showBrief },
+        { label: "我懂数据库，直接开始", action: () => showPrologue(1) }
+      ]
+    : [{
+        label: i < PROLOGUE.length - 1 ? "继续" : "进入作战室",
+        action: () => { i < PROLOGUE.length - 1 ? showPrologue(i + 1) : showHub(); }
+      }];
   showScene({
     bg: p.bg,
     portrait: null,
     autoNext: true,
     lines: p.lines,
-    choices: [{
-      label: i < PROLOGUE.length - 1 ? "继续" : "进入作战室",
-      action: () => { i < PROLOGUE.length - 1 ? showPrologue(i + 1) : showHub(); }
-    }]
+    choices
   });
+}
+
+/* ---------- 白话简报 ---------- */
+function showBrief() {
+  showScene({
+    bg: "room",
+    portrait: null,
+    autoNext: true,
+    lines: BRIEF,
+    choices: [{ label: "明白了，开始查", action: () => showPrologue(1) }]
+  });
+}
+
+/* ---------- 术语表 ---------- */
+function openGlossary() {
+  panel.className = "panel glossary-panel";
+  panel.innerHTML =
+    '<div class="panel-head"><h3>术语表 · 不懂数据库也能玩</h3><button class="x" id="pClose">×</button></div>' +
+    '<div class="panel-body">' +
+      '<div class="glossary-note">这个案子里只有 8 个词需要懂。每个词都配了一句人话和一句类比。</div>' +
+      '<div class="glossary-grid">' +
+      GLOSSARY.map((g, i) =>
+        '<div class="gloss-card"><div class="g-idx">' + String(i + 1).padStart(2, "0") + "</div>" +
+        '<div class="g-term">' + g.t + "</div>" +
+        '<div class="g-plain">' + g.p + "</div>" +
+        '<div class="g-analogy">≈ ' + g.a + "</div></div>"
+      ).join("") +
+      "</div>" +
+      '<div class="glossary-foot">开局选过「白话简报」的话，这些内容你已经看过一遍了。</div>' +
+    "</div>";
+  overlay.classList.add("on");
+  panel.scrollTop = 0;
+  panel.querySelector("#pClose").onclick = closeOverlay;
 }
 
 /* ---------- 作战室 Hub ---------- */
@@ -1012,6 +1051,7 @@ choicesEl.addEventListener("click", (e) => e.stopPropagation());
 
 $("btnClues").onclick = openClues;
 $("btnCheat").onclick = openCheat;
+$("btnGlossary").onclick = openGlossary;
 $("btnLog").onclick = openLog;
 $("btnSound").onclick = () => {
   STATE.muted = !STATE.muted;

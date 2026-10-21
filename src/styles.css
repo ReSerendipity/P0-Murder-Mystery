@@ -921,3 +921,36 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 
 /* 覆盖层打开时，提示条落到顶部下方，避免压住标题 */
 #overlay.on ~ #toast, #supportOverlay.on ~ #toast { top: 12px; }
+
+/* ===== 术语表 ===== */
+.hint-link {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .06em;
+  color: #8a9099; border-bottom: 1px dashed rgba(255,255,255,.22);
+  padding: 0 0 1px; margin-right: 6px; transition: color .2s, border-color .2s;
+}
+.hint-link:hover { color: #ffb0a2; border-color: rgba(255,75,47,.6); }
+
+.glossary-panel .panel-body { padding: 22px 24px; }
+.glossary-note {
+  font-size: 13.5px; line-height: 1.85; color: var(--dim);
+  border-left: 2px solid var(--red); background: rgba(255,75,47,.05);
+  padding: 13px 16px; margin-bottom: 18px;
+}
+.glossary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.gloss-card {
+  border: 1px solid var(--line); padding: 15px 16px; position: relative;
+  background: rgba(255,255,255,.015);
+}
+.g-idx { position: absolute; right: 12px; top: 10px; font-family: var(--f-mono); font-size: 9px; color: var(--faint); }
+.g-term { font-size: 15px; color: #f0ece5; letter-spacing: .03em; padding-right: 26px; }
+.g-plain { margin-top: 8px; font-size: 13px; line-height: 1.8; color: #c6c3bc; }
+.g-analogy { margin-top: 7px; font-size: 12px; color: #ff9c8c; opacity: .85; }
+.glossary-foot {
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .1em; color: var(--faint);
+}
+@media (max-width: 900px) {
+  .glossary-grid { grid-template-columns: 1fr; }
+  .hint-link { font-size: 9px; }
+  .dlg-hint { gap: 10px; flex-wrap: wrap; }
+}

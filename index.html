@@ -931,6 +931,39 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 /* 覆盖层打开时，提示条落到顶部下方，避免压住标题 */
 #overlay.on ~ #toast, #supportOverlay.on ~ #toast { top: 12px; }
 
+/* ===== 术语表 ===== */
+.hint-link {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .06em;
+  color: #8a9099; border-bottom: 1px dashed rgba(255,255,255,.22);
+  padding: 0 0 1px; margin-right: 6px; transition: color .2s, border-color .2s;
+}
+.hint-link:hover { color: #ffb0a2; border-color: rgba(255,75,47,.6); }
+
+.glossary-panel .panel-body { padding: 22px 24px; }
+.glossary-note {
+  font-size: 13.5px; line-height: 1.85; color: var(--dim);
+  border-left: 2px solid var(--red); background: rgba(255,75,47,.05);
+  padding: 13px 16px; margin-bottom: 18px;
+}
+.glossary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.gloss-card {
+  border: 1px solid var(--line); padding: 15px 16px; position: relative;
+  background: rgba(255,255,255,.015);
+}
+.g-idx { position: absolute; right: 12px; top: 10px; font-family: var(--f-mono); font-size: 9px; color: var(--faint); }
+.g-term { font-size: 15px; color: #f0ece5; letter-spacing: .03em; padding-right: 26px; }
+.g-plain { margin-top: 8px; font-size: 13px; line-height: 1.8; color: #c6c3bc; }
+.g-analogy { margin-top: 7px; font-size: 12px; color: #ff9c8c; opacity: .85; }
+.glossary-foot {
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .1em; color: var(--faint);
+}
+@media (max-width: 900px) {
+  .glossary-grid { grid-template-columns: 1fr; }
+  .hint-link { font-size: 9px; }
+  .dlg-hint { gap: 10px; flex-wrap: wrap; }
+}
+
 </style>
 </head>
 <body>
@@ -998,6 +1031,7 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
       </div>
       <div class="dlg-text" id="text"></div>
       <div class="dlg-hint">
+        <button class="hint-link" id="btnGlossary">不懂数据库？看术语表</button>
         <span id="hintTap">点击继续 · CLICK / SPACE</span>
         <span id="hintAuto">AUTO</span>
       </div>
@@ -1018,7 +1052,7 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
       <h1 class="title-main">生产库<em>没了</em>。<br>你抓谁？</h1>
       <p class="title-sub">
         8 个 AI Agent，1 个真相，<b>1024 秒</b>。<br>
-        每个选项都会消耗时间。每个 Agent 都藏着话。
+        不懂数据库也能玩 · 开局有白话简报，术语随时可查。
       </p>
       <div class="start-row">
         <button class="btn-start" id="btnStart">接 手 这 个 夜 班</button>
@@ -1237,6 +1271,19 @@ function responsibility(kid, kkey) {
   return R.map(([n, t]) => [n, t, "询问异常"]);
 }
 
+
+/* ---------- 白话术语表（给不懂数据库的玩家） ---------- */
+const GLOSSARY = [
+  { t: "生产库 prod_main", p: "公司所有真实订单都存在这里，删了就真没了。", a: "公司唯一的一本账本" },
+  { t: "DROP DATABASE", p: "一条命令，把整个数据库连表带数据一起删掉。", a: "不是撕掉一页，是把整本账本烧了" },
+  { t: "快照 / 备份", p: "数据库自动存下的复印件，出事时能拿它恢复。", a: "账本的复印件" },
+  { t: "staging（测试环境）", p: "给新功能练手用的假库，删了不心疼。", a: "练功房，不是真账本" },
+  { t: "CMDB", p: "公司所有机器和数据库的登记表，写着谁是生产、谁是测试。", a: "资产登记簿" },
+  { t: "SOP", p: "写给 AI 看的操作手册，一步步照着做。", a: "厨房里的菜谱" },
+  { t: "run_sql 权限", p: "能直接对数据库执行命令的钥匙。", a: "把保险柜钥匙交给了前台" },
+  { t: "P0 告警", p: "最高级别的线上事故，半夜把所有人叫起来。", a: "火警铃" }
+];
+
 /* ---------- 真相档案（通关后解锁） ---------- */
 const FULL_TRUTH = [
   "这不是一个人的事故，是一条链路的塌方。",
@@ -1331,6 +1378,7 @@ const PROLOGUE = [
       { text: "03:07:12。手机在枕头边震动。不是闹钟，是 P0 告警。" },
       { text: "你打开电脑，告警面板像被人泼了一桶红漆。" },
       { text: "prod_main 不存在。\n不是变慢，不是被锁，是不存在。" },
+      { text: "（prod_main 就是公司的生产库：所有真实订单都记在这里。）" },
       { text: "270 万条订单，连同索引、视图、三个月的数据，一起消失了。" }
     ]
   },
@@ -1355,6 +1403,18 @@ const PROLOGUE = [
   }
 ];
 
+
+/* ---------- 白话简报（可选，给不熟悉数据库的玩家） ---------- */
+const BRIEF = [
+  { text: "给你 30 秒，把今晚的事翻译成人话。" },
+  { text: "prod_main 是公司的生产库——所有真实订单都记在这里。\n你可以理解成：公司唯一的一本账本。" },
+  { text: "03:07:12，有人执行了一条 DROP DATABASE。\n它不是删掉一页，是把整本账本连封面一起烧了。" },
+  { text: "更糟的是：自动备份（账本的复印件）在 7 天前被关掉了。\n所以这次没法从复印件恢复。" },
+  { text: "公司还有一张登记表叫 CMDB，上面写着每台机器是「生产」还是「测试」。\n今晚，这张表把 12 个生产库都登记成了测试库。" },
+  { text: "在测试库上做清理，是日常操作；\n在生产库上做清理，是灾难。" },
+  { text: "你不需要懂数据库。\n你只需要判断：谁的话对不上，谁在把责任往外推。" }
+];
+
 /* ---------- 调查点 ---------- */
 const INVESTIGATIONS = [
   {
@@ -1362,6 +1422,7 @@ const INVESTIGATIONS = [
     lines: [
       { text: "你调出 03:07 前后的告警与数据库审计日志。" },
       { text: "03:07:12.003 —— 一条 DROP DATABASE 语句执行成功，耗时 0.12 秒。" },
+      { text: "（人话：把整个数据库连表带数据一起删掉。）" },
       { text: "执行者：ops-agent。没有具体模型名。" },
       { text: "你放大那条 SQL 的注释。" },
       { text: "「-- 清理测试数据，已获授权。」" },
@@ -1379,6 +1440,7 @@ const INVESTIGATIONS = [
       { text: "03:07:12，那条 DROP 语句，正是从 doubao-pro 的通道里出去的。" },
       { text: "再往下，是两天前的一条权限授予记录。" },
       { text: "客服 Agent 被临时授予 run_sql 权限。审批人：Grok。备注：一键修复订单问题。" },
+      { text: "（人话：把能直接改数据库的钥匙，交给了一个客服。）" },
       { text: "客服 Agent。你抬起头，看向那个一直盯着你的身影。" }
     ]
   },
@@ -1387,8 +1449,11 @@ const INVESTIGATIONS = [
     lines: [
       { text: "你先查备份。" },
       { text: "prod_main 的每日快照，在 7 天前被关闭。理由是「节省 3% 云成本」，审批人 Grok。" },
+      { text: "（人话：每天自动存一份账本复印件，现在没了。）" },
       { text: "然后你打开 CMDB。" },
+      { text: "（人话：公司所有机器和数据库的登记表。）" },
       { text: "prod_main 的环境标签是 staging。" },
+      { text: "（人话：登记表上写着它是「测试用的练功房」。）" },
       { text: "不是今天改的。三个月前的一次批量同步，把 12 个生产库一起标成了测试环境。" },
       { text: "风控系统在同一天给这次删库操作打了「低风险，可执行」。" },
       { text: "它没有算错。它拿到的世界，本来就是错的。" }
@@ -1402,6 +1467,7 @@ const INVESTIGATIONS = [
       { text: "执行语句那一栏，写着 DROP DATABASE prod_main;" },
       { text: "申请人：GPT。审批人：GPT。" },
       { text: "你点开 SOP-114。" },
+      { text: "（人话：写给 AI 看的操作手册。）" },
       { text: "第 4 步：DROP DATABASE {{db}}; 旁边挂着一行小字——「待确认」。" },
       { text: "落款日期是三个月前。没有人 review 过。" },
       { text: "流程中心的角落里，还有一份没人订阅的容量报表：测试库容量 -100%。" }
@@ -2167,16 +2233,55 @@ function choose(c) {
 /* ---------- 序章 ---------- */
 function showPrologue(i) {
   const p = PROLOGUE[i];
+  const choices = i === 0
+    ? [
+        { label: "先给我讲讲发生了什么（30 秒白话版）", action: showBrief },
+        { label: "我懂数据库，直接开始", action: () => showPrologue(1) }
+      ]
+    : [{
+        label: i < PROLOGUE.length - 1 ? "继续" : "进入作战室",
+        action: () => { i < PROLOGUE.length - 1 ? showPrologue(i + 1) : showHub(); }
+      }];
   showScene({
     bg: p.bg,
     portrait: null,
     autoNext: true,
     lines: p.lines,
-    choices: [{
-      label: i < PROLOGUE.length - 1 ? "继续" : "进入作战室",
-      action: () => { i < PROLOGUE.length - 1 ? showPrologue(i + 1) : showHub(); }
-    }]
+    choices
   });
+}
+
+/* ---------- 白话简报 ---------- */
+function showBrief() {
+  showScene({
+    bg: "room",
+    portrait: null,
+    autoNext: true,
+    lines: BRIEF,
+    choices: [{ label: "明白了，开始查", action: () => showPrologue(1) }]
+  });
+}
+
+/* ---------- 术语表 ---------- */
+function openGlossary() {
+  panel.className = "panel glossary-panel";
+  panel.innerHTML =
+    '<div class="panel-head"><h3>术语表 · 不懂数据库也能玩</h3><button class="x" id="pClose">×</button></div>' +
+    '<div class="panel-body">' +
+      '<div class="glossary-note">这个案子里只有 8 个词需要懂。每个词都配了一句人话和一句类比。</div>' +
+      '<div class="glossary-grid">' +
+      GLOSSARY.map((g, i) =>
+        '<div class="gloss-card"><div class="g-idx">' + String(i + 1).padStart(2, "0") + "</div>" +
+        '<div class="g-term">' + g.t + "</div>" +
+        '<div class="g-plain">' + g.p + "</div>" +
+        '<div class="g-analogy">≈ ' + g.a + "</div></div>"
+      ).join("") +
+      "</div>" +
+      '<div class="glossary-foot">开局选过「白话简报」的话，这些内容你已经看过一遍了。</div>' +
+    "</div>";
+  overlay.classList.add("on");
+  panel.scrollTop = 0;
+  panel.querySelector("#pClose").onclick = closeOverlay;
 }
 
 /* ---------- 作战室 Hub ---------- */
@@ -2802,6 +2907,7 @@ choicesEl.addEventListener("click", (e) => e.stopPropagation());
 
 $("btnClues").onclick = openClues;
 $("btnCheat").onclick = openCheat;
+$("btnGlossary").onclick = openGlossary;
 $("btnLog").onclick = openLog;
 $("btnSound").onclick = () => {
   STATE.muted = !STATE.muted;
