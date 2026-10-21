@@ -156,6 +156,7 @@ function startTimer() {
   renderTimer();
   STATE.timerId = setInterval(() => {
     if (!STATE.started || STATE.ended) return;
+    if (document.hidden) return;
     STATE.secs--;
     if (STATE.secs <= 0) { STATE.secs = 0; renderTimer(); ending("J"); return; }
     if (STATE.secs % 60 === 0) SFX.tick();
@@ -167,6 +168,13 @@ function spend(sec) {
   if (STATE.ended || !sec) return;
   STATE.secs = Math.max(0, STATE.secs - sec);
   renderTimer();
+  const d = $("timerDelta");
+  if (d) {
+    d.textContent = "−" + sec + "s";
+    d.classList.remove("show");
+    void d.offsetWidth;
+    d.classList.add("show");
+  }
   if (STATE.secs === 0) { ending("J"); }
 }
 
@@ -350,7 +358,7 @@ function showChoices(list) {
       const atEnd = choicesEl.scrollTop + choicesEl.clientHeight >= choicesEl.scrollHeight - 10;
       h.style.opacity = atEnd ? "0" : "1";
     };
-    choicesEl.addEventListener("scroll", sync, { passive: true });
+    choicesEl.onscroll = sync;
     sync();
   }
 }
@@ -384,12 +392,13 @@ function showPrologue(i) {
 /* ---------- 作战室 Hub ---------- */
 function showHub() {
   const n = STATE.clues.size;
-  const list = [{ type: "header", label: "调查现场" }];
+  const doneInv = STATE.order.inv.filter((inv) => inv.clues.every((x) => STATE.clues.has(x))).length;
+  const list = [{ type: "header", label: "调查现场 · " + doneInv + " / " + STATE.order.inv.length }];
   STATE.order.inv.forEach((inv) => {
     const done = inv.clues.every((x) => STATE.clues.has(x));
     list.push({ label: inv.title, cost: inv.cost, done, action: () => showInvestigation(inv) });
   });
-  list.push({ type: "header", label: "询问 Agent · 8 名嫌疑人" });
+  list.push({ type: "header", label: "询问 Agent · " + STATE.asked.size + " / 8 已问" });
   STATE.order.agents.forEach((a) => {
     const asked = STATE.asked.has(a.id);
     list.push({ label: "询问 " + a.id + " · " + a.duty, cost: 18, done: asked, action: () => enterAgent(a.id) });
@@ -889,7 +898,7 @@ function openTruth() {
   panel.innerHTML =
     '<div class="panel-head"><h3>真相档案 · P0-1024</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="report-top">' +
-      '<div class="grade">ALL</div>' +
+      '<div class="grade grade-truth">TRUTH</div>' +
       '<div><h2 class="report-title">八人共犯，一人回车</h2>' +
       '<div class="report-sub">这不是一个人的事故，是一条链路的塌方。下方还有八个人的真假话，可以直接点开。</div></div>' +
     "</div>" +

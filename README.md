@@ -6,6 +6,7 @@
 
 **在线试玩**：https://reserendipity.github.io/p0-murder-mystery/
 
+![封面](docs/cover.png)
 ![作战室](docs/hub.png)
 ![破绽](docs/breakthrough.png)
 ![结案报告](docs/report.png)
@@ -51,4 +52,6 @@ python build.py     # 输出 index.html 与 P0事故剧本杀.html
 
 ## License
 
-[Apache License 2.0](LICENSE)
+代码以 [Apache License 2.0](LICENSE) 开源。
+
+> 注：8 张角色立绘为第三方同人二创素材，仅用于本 Demo 的演示，版权归原作者所有，不包含在 Apache-2.0 授权范围内。若要商用或再分发，请替换为自己的立绘。

@@ -890,3 +890,34 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
     opacity: .14; bottom: 34vh; transform: translateX(50%) translateY(-8px) scale(.97);
   }
 }
+
+/* ===== 计时增量提示 ===== */
+.timer-wrap { position: relative; }
+.timer-delta {
+  position: absolute; left: 0; top: 100%; margin-top: 2px;
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .08em;
+  color: var(--red); opacity: 0; pointer-events: none;
+}
+.timer-delta.show { animation: deltaFly .9s ease-out; }
+@keyframes deltaFly {
+  0% { opacity: 0; transform: translateY(-4px); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+
+/* ===== 真相档案徽章 ===== */
+.report .grade-truth {
+  font-size: 12px; letter-spacing: .06em; font-family: var(--f-mono);
+  color: var(--red); transform: rotate(-3deg);
+}
+
+/* ===== 封面缩略图略放大 ===== */
+.cover-thumb { width: 34px; height: 44px; }
+
+/* ===== iOS 动态视口 ===== */
+@supports (height: 100dvh) {
+  html, body { height: 100dvh; }
+}
+
+/* 覆盖层打开时，提示条落到顶部下方，避免压住标题 */
+#overlay.on ~ #toast, #supportOverlay.on ~ #toast { top: 12px; }
