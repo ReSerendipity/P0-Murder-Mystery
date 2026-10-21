@@ -428,6 +428,39 @@ function openGlossary() {
   panel.querySelector("#pClose").onclick = closeOverlay;
 }
 
+/* ---------- 标题页：白话简报 + 术语表 ---------- */
+function openBriefPanel(fromTitle) {
+  const lines = BRIEF.map((b) =>
+    '<p class="brief-line">' + b.text.replace(/\n/g, "<br>") + "</p>").join("");
+  panel.className = "panel brief-panel";
+  panel.innerHTML =
+    '<div class="panel-head"><h3>30 秒看懂这个案子</h3><button class="x" id="pClose">×</button></div>' +
+    '<div class="panel-body">' +
+      '<div class="brief-intro">这个案子里只有 8 个词需要懂。先看人话版，再决定要不要玩。</div>' +
+      '<div class="brief-body">' + lines + "</div>" +
+      '<div class="brief-sub">术语表</div>' +
+      '<div class="glossary-grid">' +
+      GLOSSARY.map((g, i) =>
+        '<div class="gloss-card"><div class="g-idx">' + String(i + 1).padStart(2, "0") + "</div>" +
+        '<div class="g-term">' + g.t + "</div>" +
+        '<div class="g-plain">' + g.p + "</div>" +
+        '<div class="g-analogy">≈ ' + g.a + "</div></div>").join("") +
+      "</div>" +
+      '<div class="brief-actions">' +
+        '<button class="btn primary" id="briefStart">知道了，开始查案</button>' +
+        '<button class="btn" id="briefClose">先等等</button>' +
+      "</div>" +
+    "</div>";
+  overlay.classList.add("on");
+  panel.scrollTop = 0;
+  panel.querySelector("#pClose").onclick = closeOverlay;
+  panel.querySelector("#briefClose").onclick = closeOverlay;
+  panel.querySelector("#briefStart").onclick = () => {
+    closeOverlay();
+    setTimeout(() => startGame(), 120);
+  };
+}
+
 /* ---------- 作战室 Hub ---------- */
 function showHub() {
   const n = STATE.clues.size;
@@ -1046,6 +1079,7 @@ function startGame() {
 }
 
 $("btnStart").addEventListener("click", startGame);
+$("btnTitleHelp").addEventListener("click", () => openBriefPanel(true));
 dialogue.addEventListener("click", advance);
 choicesEl.addEventListener("click", (e) => e.stopPropagation());
 
