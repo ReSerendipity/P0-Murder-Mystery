@@ -380,7 +380,7 @@ function showPrologue(i) {
   const choices = i === 0
     ? [
         { label: "先给我讲讲发生了什么（30 秒白话版）", action: showBrief },
-        { label: "我懂数据库，直接开始", action: () => showPrologue(1) }
+        { label: "我熟悉这类事故，直接开始", action: () => showPrologue(1) }
       ]
     : [{
         label: i < PROLOGUE.length - 1 ? "继续" : "进入作战室",
@@ -412,7 +412,7 @@ function openGlossary() {
   panel.innerHTML =
     '<div class="panel-head"><h3>术语表 · 不懂数据库也能玩</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body">' +
-      '<div class="glossary-note">这个案子里只有 8 个词需要懂。每个词都配了一句人话和一句类比。</div>' +
+      '<div class="glossary-note">这个案子里只有 " + GLOSSARY.length + " 个词需要懂。每个词都配了一句人话和一句类比。</div>' +
       '<div class="glossary-grid">' +
       GLOSSARY.map((g, i) =>
         '<div class="gloss-card"><div class="g-idx">' + String(i + 1).padStart(2, "0") + "</div>" +
@@ -436,7 +436,7 @@ function openBriefPanel(fromTitle) {
   panel.innerHTML =
     '<div class="panel-head"><h3>30 秒看懂这个案子</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body">' +
-      '<div class="brief-intro">这个案子里只有 8 个词需要懂。先看人话版，再决定要不要玩。</div>' +
+      '<div class="brief-intro">这个案子里只有 " + GLOSSARY.length + " 个词需要懂。先看人话版，再决定要不要玩。</div>' +
       '<div class="brief-body">' + lines + "</div>" +
       '<div class="brief-sub">术语表</div>' +
       '<div class="glossary-grid">' +
@@ -470,7 +470,7 @@ function showHub() {
     const done = inv.clues.every((x) => STATE.clues.has(x));
     list.push({ label: inv.title, cost: inv.cost, done, action: () => showInvestigation(inv) });
   });
-  list.push({ type: "header", label: "询问 Agent · " + STATE.asked.size + " / 8 已问" });
+  list.push({ type: "header", label: "询问 Agent · " + STATE.asked.size + " / " + AGENTS.length + " 已问" });
   STATE.order.agents.forEach((a) => {
     const asked = STATE.asked.has(a.id);
     list.push({ label: "询问 " + a.id + " · " + a.duty, cost: 18, done: asked, action: () => enterAgent(a.id) });
@@ -483,7 +483,7 @@ function showHub() {
   }
   const hint = n >= 6
     ? "线索够拼出一个故事了。但你只有一次指认的机会。"
-    : "你站在作战室中央。八名 Agent 都在等你的下一个问题。";
+    : "你站在作战室中央。九名 Agent 都在等你的下一个问题。";
   showScene({
     bg: "room",
     portrait: null,
@@ -649,6 +649,7 @@ function computeEnding() {
     if (who === "Gemini") return "E";
     if (who === "Grok") return "F";
     if (who === "GPT") return "G";
+    if (who === "GLM") return "L";
     return "H";
   }
   if (acc === "malice") return "B";
@@ -696,10 +697,10 @@ function reportTimeline() {
 }
 
 const ROOT_CAUSE = {
-  S: "CMDB 把 12 个生产库误标为 staging；工单把「分区表」写成 DROP DATABASE 并自批自过；SOP-114 的删库语句三个月无人复核；备份与 run_sql 权限在风控绿灯下被关闭、被下放。四条错误链路叠加，最后由豆包执行。",
+  S: "门牌把 12 间档案室误贴成「练习室」；工单把「练习资料」写成清空档案库并自批自过；工作手册第 4 步三个月无人核对；复印件被停、钥匙被配给客服、风险被放行；换班规则专挑便宜的接手。五条错误链子叠加，最后由豆包按下清空键。",
   A: "同一条错误链路成立，但你的证据链不完整，无法证明豆包是被误导而非蓄意。",
-  B: "你认定豆包蓄意删库。报告采用了你的判断，动机部分被写成了「恶意操作」。",
-  K: "你认定有人指使她。但日志里没有第二个人的指纹。",
+  B: "你认定豆包故意清空。报告采用了你的判断，动机部分被写成了「恶意操作」。",
+  K: "你认定有人指使她。但记录里没有第二个人的指纹。",
   I: "你把事故归因为系统故障，没有提交责任人。事故被挂起。",
   J: "超时。系统自动生成报告：直接原因——临时工（已离职），数据安全可控。"
 };
@@ -711,7 +712,7 @@ function showReport(id) {
   const rows = responsibility(e.culprit, true);
   const culprits = e.culprit ? e.culprit.split("|") : [];
   const truth = (id === "S" || id === "A")
-    ? '<div class="truth-box"><div class="k">真相</div><p>豆包不是恶意的。她只是用户喊「搜不到订单」时，照着工单、SOP 和 CMDB 标签，做了一件她以为被授权的事。真正按下回车的，是她；真正把她推上去的，是整条链路。</p><p class="quote">8 个 Agent 都有罪。但只有一个人按下了回车。</p></div>'
+    ? '<div class="truth-box"><div class="k">真相</div><p>豆包不是恶意的。她只是用户喊「订单不见了」时，照着工单、手册和门牌，做了一件她以为被授权的事。真正按下清空的，是她；真正把她推上去的，是整条链子。</p><p class="quote">" + AGENTS.length + " 个 Agent 都有罪。但只有一个人按下了清空键。</p></div>'
     : "";
   panel.className = "panel report";
   panel.innerHTML =
@@ -720,7 +721,7 @@ function showReport(id) {
       "<div><h2 class=\"report-title\">" + e.title + "</h2><div class=\"report-sub\">" + e.sub + "</div></div>" +
     "</div>" +
     '<div class="truth-cta">' +
-      '<div><div class="k">TRUTH UNLOCKED</div><p>你已通关本局。完整真相档案已解锁，包含事故全时间线、八个人的真假话与关键证据链。</p></div>' +
+      '<div><div class="k">TRUTH UNLOCKED</div><p>你已通关本局。完整真相档案已解锁，包含事故全时间线、" + AGENTS.length + " 个人的真假话与关键证据链。</p></div>' +
       '<button class="btn primary" id="btnTruth">打开真相档案 →</button>' +
     "</div>" +
     '<div class="report-meta">' +
@@ -729,7 +730,7 @@ function showReport(id) {
       "<span>用时 <b>" + fmt(used) + "</b></span>" +
       "<span>支撑线索 <b>" + STATE.supports.length + " / 3</b></span>" +
       "<span>已归档 <b>" + STATE.clues.size + " / " + CLUES.length + "</b></span>" +
-      "<span>破绽 <b>" + STATE.broken.size + " / 8</b></span>" +
+      "<span>破绽 <b>" + STATE.broken.size + " / " + AGENTS.length + "</b></span>" +
       "<span>作弊 <b>" + STATE.cheats + " 次</b></span>" +
       "<span>已解锁结局 <b>" + unlockedEndings().size + " / " + Object.keys(ENDINGS).length + "</b></span>" +
     "</div>" +
@@ -757,7 +758,7 @@ function showReport(id) {
 
 function copyText() {
   const e = ENDINGS[STATE.ending];
-  const t = "【P0 事故剧本杀 · 谁动了生产库】\n" +
+  const t = "【P0 事故剧本杀 · 谁动了档案库】\n" +
     "结案评级：" + e.grade + "\n" +
     "指认：" + (e.culprit ? e.culprit.replace("|", " / ") : "无") + "\n" +
     "用时：" + fmt(1024 - STATE.secs) + " / 线索 " + STATE.clues.size + "/" + CLUES.length + "\n" +
@@ -819,12 +820,12 @@ function makeCard() {
     x.fillStyle = "#ff4b2f"; x.font = '500 22px "Consolas", monospace';
     x.fillText("VERDICT", 72, bottom - 150);
     x.fillStyle = "#e8e4dc"; x.font = '400 30px "Microsoft YaHei"';
-    wrapText(x, "8 个 Agent 都有罪。但只有一个人按下了回车。", 72, bottom - 104, 936, 44);
+    wrapText(x, AGENTS.length + " 个 Agent 都有罪。但只有一个人按下了清空键。", 72, bottom - 104, 936, 44);
     // 页脚
     x.fillStyle = "#5a5f67"; x.font = '400 20px "Consolas", monospace';
-    x.fillText("1024 BUILDER · 谁动了生产库", 72, bottom);
+    x.fillText("1024 BUILDER · 谁动了档案库", 72, bottom);
     x.textAlign = "right";
-    x.fillText("线索 " + STATE.clues.size + "/" + CLUES.length + "  ·  破绽 " + STATE.broken.size + "/8", 1008, bottom);
+    x.fillText("线索 " + STATE.clues.size + "/" + CLUES.length + "  ·  破绽 " + STATE.broken.size + "/" + AGENTS.length, 1008, bottom);
     x.textAlign = "left";
     const a = document.createElement("a");
     a.download = "P0结案卡-" + e.grade + ".png";
@@ -971,8 +972,8 @@ function openTruth() {
     '<div class="panel-head"><h3>真相档案 · P0-1024</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="report-top">' +
       '<div class="grade grade-truth">TRUTH</div>' +
-      '<div><h2 class="report-title">八人共犯，一人回车</h2>' +
-      '<div class="report-sub">这不是一个人的事故，是一条链路的塌方。下方还有八个人的真假话，可以直接点开。</div></div>' +
+      '<div><h2 class="report-title">' + AGENTS.length + '人共犯，一人清空</h2>' +
+      '<div class="report-sub">这不是一个人的事故，是一条链子的塌方。下方还有' + AGENTS.length + '个人的真假话，可以直接点开。</div></div>' +
     "</div>" +
     '<div class="report-grid">' +
       '<div class="report-sec"><h4>完整时间线</h4><div class="timeline">' + timeline + "</div></div>" +
@@ -980,7 +981,7 @@ function openTruth() {
         '<h4 style="margin-top:22px">结局图鉴 ' + un.size + " / " + total + "</h4>" +
         '<div class="en-list">' + endings + "</div></div>" +
     "</div>" +
-    '<div class="report-sec"><h4>八个人的真假话（点开看）</h4><div class="truth-agents">' + agents + "</div></div>" +
+    '<div class="report-sec"><h4>' + AGENTS.length + '个人的真假话（点开看）</h4><div class="truth-agents">' + agents + "</div></div>" +
     '<div class="report-actions"><button class="btn" id="truthClose">返回</button></div>';
   overlay.classList.add("on");
   panel.scrollTop = 0;
@@ -1027,7 +1028,7 @@ function openClues() {
 }
 function showClueDetail(n) {
   const c = CLUE_MAP[n];
-  const body = c.a.replace(/DROP DATABASE[^\n]*/g, '<span class="hl">$&</span>');
+  const body = c.a.replace(/一键清空[^\n]*/g, '<span class="hl">$&</span>');
   panel.innerHTML =
     '<div class="panel-head"><h3>线索 C-' + String(n).padStart(2, "0") + '</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body clue-detail"><h4>' + c.label + "</h4>" +
@@ -1141,7 +1142,7 @@ function coverShow(i, user) {
   img.classList.add("in");
   $("coverName").textContent = a.id;
   $("coverDuty").textContent = a.duty;
-  $("coverIdx").textContent = String(i + 1).padStart(2, "0") + " / 08";
+  $("coverIdx").textContent = String(i + 1).padStart(2, "0") + " / " + String(AGENTS.length).padStart(2, "0");
   document.querySelectorAll(".cover-thumb").forEach((el, k) => el.classList.toggle("on", k === i));
   if (user) SFX.tone(760, 0.04, "sine", 0.02);
 }
