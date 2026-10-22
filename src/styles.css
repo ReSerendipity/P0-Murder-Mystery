@@ -129,8 +129,14 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
   filter: drop-shadow(0 30px 70px rgba(0,0,0,.75)) drop-shadow(0 0 22px rgba(255,75,47,.16)) saturate(1.02);
 }
 @keyframes speak {
-  0%, 100% { transform: translateY(0) rotate(-.25deg); }
-  50% { transform: translateY(-5px) rotate(.45deg); }
+  0%, 100% { transform: translateY(0) rotate(-.5deg) scale(1); }
+  50% { transform: translateY(-11px) rotate(.7deg) scale(1.02); }
+}
+/* 待机呼吸：立绘在场但该行不是她说的——绝不完全静止 */
+.portrait.in:not(.speaking):not(.shake) { animation: idle 3.8s ease-in-out infinite; }
+@keyframes idle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.014); }
 }
 .portrait.avatar {
   height: 46vh; width: 46vh; border-radius: 50%;
@@ -861,6 +867,27 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
   .timer { font-size: 22px; }
   .title-clock { font-size: clamp(52px, 12vh, 96px); }
   .cover-agent { height: 58vh; }
+}
+
+/* ===== 横屏 / 矮视口适配（手机横屏 844x390 等） ===== */
+@media (max-height: 500px) {
+  /* 标题页：按钮不再压页脚 */
+  .title-foot { display: none; }
+  .title-body { padding-top: 20vh; }
+  .title-clock { font-size: clamp(38px, 10vh, 56px); }
+  .title-caption { margin-top: 5px; font-size: 10px; }
+  .title-main { font-size: clamp(20px, 5.6vh, 28px); margin-top: 8px; }
+  .start-row { margin-top: 12px; }
+  .title-help { margin-top: 8px; }
+  .cover-agent { top: 3vh; height: 46vh; }
+  /* 作战室：对话框压缩，选项面板不再压对话 */
+  .dialogue { min-height: 30vh; padding: 0 18px 10px; }
+  .dlg-text { min-height: 3em; max-height: 5.4em; line-height: 1.75; }
+  .name-row { min-height: 24px; margin-bottom: 5px; }
+  .dlg-hint { margin-top: 3px; }
+  .choices { bottom: calc(42vh + 8px); max-height: 34vh; gap: 6px; }
+  .choice { padding: 9px 12px; font-size: 13px; }
+  .portrait-wrap { height: 40vh; bottom: 30vh; }
 }
 
 /* ===== 顶栏与窄屏修订 ===== */

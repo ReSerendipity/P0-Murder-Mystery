@@ -181,6 +181,7 @@ function spend(sec) {
 /* ---------- 立绘 / 说话 ---------- */
 function setPortrait(id) {
   if (!id) {
+    setSpeaking(false);
     portraitEl.classList.remove("in");
     setTimeout(() => { if (!portraitEl.classList.contains("in")) portraitEl.removeAttribute("src"); }, 300);
     return;
@@ -241,7 +242,8 @@ function finishLine() {
   if (ln) textEl.textContent = ln.text;
   const caret = textEl.querySelector(".caret");
   if (caret) caret.remove();
-  setSpeaking(false);
+  // 说话动画持续到整行显示结束：该行是谁说的，立绘就继续动
+  setSpeaking(!!(ln && ln.who));
   const last = !s || STATE.lineIndex >= s.lines.length - 1;
   if (last) {
     showChoices(s ? s.choices : null);
@@ -298,7 +300,7 @@ function renderLine(ln, instant) {
   if (instant) {
     textEl.textContent = ln.text;
     STATE.lineDone = true;
-    setSpeaking(false);
+    setSpeaking(!!ln.who);
     const last = STATE.lineIndex >= STATE.scene.lines.length - 1;
     if (last) showChoices(STATE.scene.choices);
   } else {
@@ -412,7 +414,7 @@ function openGlossary() {
   panel.innerHTML =
     '<div class="panel-head"><h3>术语表 · 不懂数据库也能玩</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body">' +
-      '<div class="glossary-note">这个案子里只有 " + GLOSSARY.length + " 个词需要懂。每个词都配了一句人话和一句类比。</div>' +
+      '<div class="glossary-note">这个案子里只有 ' + GLOSSARY.length + ' 个词需要懂。每个词都配了一句人话和一句类比。</div>' +
       '<div class="glossary-grid">' +
       GLOSSARY.map((g, i) =>
         '<div class="gloss-card"><div class="g-idx">' + String(i + 1).padStart(2, "0") + "</div>" +
@@ -436,7 +438,7 @@ function openBriefPanel(fromTitle) {
   panel.innerHTML =
     '<div class="panel-head"><h3>30 秒看懂这个案子</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body">' +
-      '<div class="brief-intro">这个案子里只有 " + GLOSSARY.length + " 个词需要懂。先看人话版，再决定要不要玩。</div>' +
+      '<div class="brief-intro">这个案子里只有 ' + GLOSSARY.length + ' 个词需要懂。先看人话版，再决定要不要玩。</div>' +
       '<div class="brief-body">' + lines + "</div>" +
       '<div class="brief-sub">术语表</div>' +
       '<div class="glossary-grid">' +
@@ -712,7 +714,7 @@ function showReport(id) {
   const rows = responsibility(e.culprit, true);
   const culprits = e.culprit ? e.culprit.split("|") : [];
   const truth = (id === "S" || id === "A")
-    ? '<div class="truth-box"><div class="k">真相</div><p>豆包不是恶意的。她只是用户喊「订单不见了」时，照着工单、手册和门牌，做了一件她以为被授权的事。真正按下清空的，是她；真正把她推上去的，是整条链子。</p><p class="quote">" + AGENTS.length + " 个 Agent 都有罪。但只有一个人按下了清空键。</p></div>'
+    ? '<div class="truth-box"><div class="k">真相</div><p>豆包不是恶意的。她只是用户喊「订单不见了」时，照着工单、手册和门牌，做了一件她以为被授权的事。真正按下清空的，是她；真正把她推上去的，是整条链子。</p><p class="quote">' + AGENTS.length + ' 个 Agent 都有罪。但只有一个人按下了清空键。</p></div>'
     : "";
   panel.className = "panel report";
   panel.innerHTML =
@@ -721,7 +723,7 @@ function showReport(id) {
       "<div><h2 class=\"report-title\">" + e.title + "</h2><div class=\"report-sub\">" + e.sub + "</div></div>" +
     "</div>" +
     '<div class="truth-cta">' +
-      '<div><div class="k">TRUTH UNLOCKED</div><p>你已通关本局。完整真相档案已解锁，包含事故全时间线、" + AGENTS.length + " 个人的真假话与关键证据链。</p></div>' +
+      '<div><div class="k">TRUTH UNLOCKED</div><p>你已通关本局。完整真相档案已解锁，包含事故全时间线、' + AGENTS.length + ' 个人的真假话与关键证据链。</p></div>' +
       '<button class="btn primary" id="btnTruth">打开真相档案 →</button>' +
     "</div>" +
     '<div class="report-meta">' +
