@@ -16,7 +16,7 @@ PORTRAITS = os.path.join(ROOT, "assets", "portraits")
 OUT_MAIN = os.path.join(ROOT, "index.html")
 OUT_COPY = os.path.join(ROOT, "P0事故剧本杀.html")
 
-KEYS = ["deepseek", "chatgpt", "claude", "gemini", "grok", "kimi", "qwen", "doubao"]
+KEYS = ["deepseek", "chatgpt", "claude", "gemini", "grok", "kimi", "qwen", "doubao", "glm"]
 
 
 def read(path):
