@@ -2026,6 +2026,7 @@ const CLUE_MAP = Object.fromEntries(CLUES.map((c) => [c.no, c]));
 /* ---------- 音效（全部代码合成） ---------- */
 const SFX = {
   ctx: null, master: null, muted: false, ambient: null,
+  tensionTimer: null, tensionLevel: 0,
   init() {
     if (this.ctx) return;
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -2088,14 +2089,51 @@ const SFX = {
     this.ambient = this.ctx.createGain(); this.ambient.gain.value = 0.01;
     src.connect(lp); lp.connect(this.ambient); this.ambient.connect(this.master);
     src.start();
+    // 呼吸感：用低频 LFO 轻微调制环境音量，避免一成不变的静态噪音
+    const lfo = this.ctx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 0.08;
+    const lfoGain = this.ctx.createGain(); lfoGain.gain.value = 0.003;
+    lfo.connect(lfoGain); lfoGain.connect(this.ambient.gain); lfo.start();
+    // 机房低鸣：55Hz 正弦经低通后的极弱底噪，铺一层空间感
+    const drone = this.ctx.createOscillator(); drone.type = "sine"; drone.frequency.value = 55;
+    const dlp = this.ctx.createBiquadFilter(); dlp.type = "lowpass"; dlp.frequency.value = 220;
+    const dg = this.ctx.createGain(); dg.gain.value = 0.012;
+    drone.connect(dlp); dlp.connect(dg); dg.connect(this.master);
+    drone.start();
   },
   setMuted(m) {
     this.muted = m;
     if (this.master) this.master.gain.value = m ? 0 : 0.9;
   },
   voice(agent) {
-    if (!agent) return;
-    this.tone(agent.freq, 0.032, agent.wave, 0.017);
+    if (!agent || !this.ctx || this.muted) return;
+    // 每个字轻微抖动音高 + 向下滑音 + 基频与八度泛音，确保笔记本扬声器也能听清文字音
+    const j = 1 + (Math.random() * 0.06 - 0.03);          // ±3% 音高随机
+    const f = agent.freq * j;
+    const t = this.ctx.currentTime;
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = Math.min(4200, f * 9);            // 适当放宽，保留可闻的高频
+    lp.Q.value = 0.7;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.06, t + 0.006);       // 明显可闻的音量（此前 0.022 偏轻）
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    const o1 = this.ctx.createOscillator();
+    o1.type = agent.wave;
+    o1.frequency.setValueAtTime(f, t);
+    o1.frequency.exponentialRampToValueAtTime(f * 0.94, t + 0.04);  // 语音式下滑
+    const o2 = this.ctx.createOscillator();
+    o2.type = "sine";
+    o2.frequency.setValueAtTime(f * 2, t);                 // 八度泛音：补足纯正弦角色（Kimi/豆包等）的存在感
+    o2.frequency.exponentialRampToValueAtTime(f * 1.9, t + 0.04);
+    const g2 = this.ctx.createGain(); g2.gain.value = 0.45;
+    o1.connect(lp); o2.connect(g2); g2.connect(lp);
+    lp.connect(g); g.connect(this.master);
+    o1.start(t); o2.start(t);
+    o1.stop(t + 0.06); o2.stop(t + 0.06);
+  },
+  typeTick() {                                        // 旁白打字机轻响：无角色说话时的中性文字音
+    this.tone(700 + Math.random() * 140, 0.02, "triangle", 0.03);
   },
   clue() {
     this.tone(660, 0.08, "sine", 0.05, 990);
@@ -2114,6 +2152,99 @@ const SFX = {
   endingBad() {
     this.tone(110, 1.4, "sawtooth", 0.05);
     this.tone(116, 1.4, "sine", 0.04);
+  },
+
+  /* ---------- 计时紧张层：心跳随剩余时间加速 ---------- */
+  startTension() {
+    if (this.tensionTimer || !this.ctx) return;
+    const beat = () => {
+      if (!this.ctx || this.muted) return;
+      if (this.tensionLevel === 1) {                 // 危险（<=120s）：缓慢双跳
+        this.tone(70, 0.12, "sine", 0.06, 48);
+        setTimeout(() => this.tone(60, 0.12, "sine", 0.05, 42), 180);
+      } else if (this.tensionLevel === 2) {          // 临界（<=60s）：更快更高
+        this.tone(84, 0.1, "sine", 0.07, 56);
+        setTimeout(() => this.tone(72, 0.1, "sine", 0.06, 48), 120);
+      }
+    };
+    this.tensionTimer = setInterval(beat, this.tensionLevel === 2 ? 1000 : 2000);
+  },
+  setTension(level) {
+    if (level === this.tensionLevel) return;
+    this.tensionLevel = level;
+    if (this.tensionTimer) { clearInterval(this.tensionTimer); this.tensionTimer = null; }
+    if (level === 0 || !this.ctx) return;
+    this.startTension();
+  },
+  stopTension() { this.setTension(0); },
+
+  /* ---------- 事件音 ---------- */
+  investigate() {                                     // 进入调查现场：上扫 + 轻噪
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(); o.type = "triangle";
+    o.frequency.setValueAtTime(220, t);
+    o.frequency.exponentialRampToValueAtTime(880, t + 0.25);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.04, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + 0.34);
+    this.noise(0.18, 0.02, 1200, 0.8);
+  },
+  enterAgentSfx(agent) {                              // 进入询问：下行 whoosh + 角色签名音
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(); o.type = "sine";
+    o.frequency.setValueAtTime(520, t);
+    o.frequency.exponentialRampToValueAtTime(180, t + 0.22);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.03, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + 0.28);
+    if (agent) setTimeout(() => this.tone(agent.freq, 0.06, agent.wave, 0.02), 140);
+  },
+  returnHub() {                                       // 返回作战室：柔和下行音
+    this.tone(330, 0.06, "sine", 0.025, 247);
+  },
+  archiveOpen() {                                     // 打开线索档案：抽屉声 + 和声
+    this.noise(0.08, 0.03, 2200, 1.2);
+    this.tone(523, 0.07, "triangle", 0.03);
+    setTimeout(() => this.tone(659, 0.08, "triangle", 0.025), 60);
+  },
+  reveal() {                                          // 真相档案：上行和弦
+    [392, 523, 659, 784].forEach((f, i) => setTimeout(() => this.tone(f, 0.32, "sine", 0.04), i * 90));
+  },
+  paper() {                                           // 出示线索：纸张翻动
+    this.noise(0.12, 0.035, 1600, 0.6);
+  },
+  accuse() {                                          // 进入指认（红屏）：压迫式下滑
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(140, t);
+    o.frequency.exponentialRampToValueAtTime(70, t + 0.6);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.05, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.65);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + 0.7);
+    this.tone(55, 0.7, "sine", 0.05, 40);
+  },
+  cardDone() {                                        // 结案卡生成：快门 + 确认音
+    this.noise(0.05, 0.04, 3000, 1.5);
+    setTimeout(() => this.tone(1320, 0.05, "square", 0.02), 30);
+    setTimeout(() => { this.tone(523, 0.18, "triangle", 0.035); this.tone(784, 0.2, "triangle", 0.03); }, 60);
+  },
+  uiClick() {                                         // 通用 UI 轻点（术语表/记录/作弊/简报）
+    this.tone(880, 0.025, "square", 0.018);
+  },
+  select() {                                          // 进入支撑线索选择：确认音
+    this.tone(660, 0.05, "sine", 0.03);
   }
 };
 
@@ -2163,6 +2294,12 @@ function renderTimer() {
     SFX.tick();
     SFX.tone(392, 0.16, "square", 0.05);
     SFX.tone(262, 0.3, "square", 0.05, 0.18);
+  }
+  // 计时紧张层：随剩余时间进入危险/临界心跳
+  if (STATE.started && !STATE.ended && !STATE.sealed) {
+    SFX.setTension(critical ? 2 : danger ? 1 : 0);
+  } else {
+    SFX.setTension(0);
   }
 }
 function startTimer() {
@@ -2238,7 +2375,7 @@ function typeText(str, who) {
   STATE.typing = setInterval(() => {
     i += 1;
     tn.nodeValue = str.slice(0, i);
-    if (agent && i % 3 === 0) SFX.voice(agent);
+    if (i % 2 === 0) { if (agent) SFX.voice(agent); else SFX.typeTick(); }
     if (i >= str.length) {
       clearInterval(STATE.typing);
       STATE.typing = null;
@@ -2445,6 +2582,7 @@ function openGlossary() {
       '<div class="glossary-foot">开局选过「白话简报」的话，这些内容你已经看过一遍了。</div>' +
     "</div>";
   overlay.classList.add("on");
+  SFX.uiClick();
   panel.scrollTop = 0;
   panel.querySelector("#pClose").onclick = closeOverlay;
 }
@@ -2484,6 +2622,7 @@ function openBriefPanel(fromTitle) {
 
 /* ---------- 作战室 Hub ---------- */
 function showHub() {
+  SFX.returnHub();
   const n = STATE.clues.size;
   const doneInv = STATE.order.inv.filter((inv) => inv.clues.every((x) => STATE.clues.has(x))).length;
   const list = [{ type: "header", label: "调查现场 · " + doneInv + " / " + STATE.order.inv.length }];
@@ -2522,6 +2661,7 @@ function showHub() {
 
 /* ---------- 调查 ---------- */
 function showInvestigation(inv) {
+  SFX.investigate();
   inv.clues.forEach((n) => collectClue(n, true));
   showScene({
     bg: inv.bg,
@@ -2542,6 +2682,7 @@ function collectClue(n, silent) {
 function enterAgent(id) {
   STATE.asked.add(id);
   const d = DIALOGUE[id];
+  SFX.enterAgentSfx(AGENT_MAP[id]);
   showScene({ bg: "room", portrait: id, lines: d.intro, choices: agentMenu(id) });
 }
 function agentMenu(id) {
@@ -2582,6 +2723,7 @@ function openPresent(id) {
       '</span><div class="t">' + c.label + '</div><div class="w">' + c.keyword + "</div></button>"
     ).join("") + "</div></div>";
   overlay.classList.add("on");
+  SFX.paper();
   panel.querySelector("#pClose").onclick = closeOverlay;
   panel.querySelectorAll(".clue-card").forEach((el) => {
     el.onclick = () => {
@@ -2632,6 +2774,7 @@ function sealCase() {
 
 /* ---------- 结案 ---------- */
 function showAccuse1() {
+  SFX.accuse();
   showScene({
     bg: "red", portrait: null, instant: true,
     lines: [{ text: "十秒后，你要说出一个名字。说错，今晚就白熬了。" }],
@@ -2686,6 +2829,7 @@ function openSupport() {
     };
   });
   supportOverlay.classList.add("on");
+  SFX.select();
 }
 
 /* ---------- 结局判定 ---------- */
@@ -2716,6 +2860,7 @@ function ending(id) {
   clearInterval(STATE.timerId);
   clearInterval(STATE.typing);
   STATE.typing = null;
+  SFX.stopTension();
   clearTimeout(STATE.autoTimer);
   setSpeaking(false);
   const e = ENDINGS[id];
@@ -2879,6 +3024,7 @@ function makeCard() {
     a.download = "P0结案卡-" + e.grade + ".png";
     a.href = c.toDataURL("image/png");
     a.click();
+    SFX.cardDone();
     toast("结案卡已生成");
   };
   if (e.portrait) {
@@ -3032,6 +3178,7 @@ function openTruth() {
     '<div class="report-sec"><h4>' + AGENTS.length + '个人的真假话（点开看）</h4><div class="truth-agents">' + agents + "</div></div>" +
     '<div class="report-actions"><button class="btn" id="truthClose">返回</button></div>';
   overlay.classList.add("on");
+  SFX.reveal();
   panel.scrollTop = 0;
   panel.querySelector("#pClose").onclick = closeOverlay;
   panel.querySelector("#truthClose").onclick = closeOverlay;
@@ -3068,6 +3215,7 @@ function openClues() {
     '</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body"><div class="clue-grid">' + cards + "</div></div>";
   overlay.classList.add("on");
+  SFX.archiveOpen();
   panel.scrollTop = 0;
   panel.querySelector("#pClose").onclick = closeOverlay;
   panel.querySelectorAll(".clue-card:not(.locked)").forEach((el) => {
@@ -3098,6 +3246,7 @@ function openLog() {
     '<div class="panel-head"><h3>对话记录</h3><button class="x" id="pClose">×</button></div>' +
     '<div class="panel-body"><div class="history-list">' + (items || "暂无") + "</div></div>";
   overlay.classList.add("on");
+  SFX.uiClick();
   panel.scrollTop = 0;
   panel.querySelector("#pClose").onclick = closeOverlay;
   panel.querySelector(".panel-body").scrollTop = 99999;
@@ -3110,6 +3259,7 @@ function restartGame() {
   clearInterval(STATE.timerId);
   clearInterval(STATE.typing);
   clearTimeout(STATE.autoTimer);
+  SFX.stopTension();
   // 重置状态（localStorage 由 unlockEndings 自行管理，此处不触碰）
   STATE.started = false; STATE.ended = false; STATE.ending = null;
   STATE.secs = 1024; STATE.scene = null; STATE.lineIndex = 0;
@@ -3186,6 +3336,18 @@ $("btnAuto").onclick = () => {
   $("hintAuto").classList.toggle("on", STATE.auto);
   if (STATE.auto) SFX.tone(660, 0.05, "sine", 0.03);
 };
+
+/* ---------- 音频解锁：首个用户手势（点击/按键）即解锁 AudioContext ---------- */
+/* 绕过浏览器自动播放策略——否则经 setTimeout/异步路径启动游戏时，
+   音频上下文会一直停留在 suspended，整局没有任何声音。 */
+function unlockAudio() {
+  SFX.init();
+  SFX.resume();
+  window.removeEventListener("pointerdown", unlockAudio);
+  window.removeEventListener("keydown", unlockAudio);
+}
+window.addEventListener("pointerdown", unlockAudio);
+window.addEventListener("keydown", unlockAudio);
 
 overlay.addEventListener("click", (e) => { if (e.target === overlay) closeOverlay(); });
 supportOverlay.addEventListener("click", (e) => { if (e.target === supportOverlay) supportOverlay.classList.remove("on"); });
