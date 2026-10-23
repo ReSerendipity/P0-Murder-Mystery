@@ -5,4 +5,4 @@
 Thumbs.db
 __pycache__/
 /local/
-!/AGENTS.md
+AGENTS.md
