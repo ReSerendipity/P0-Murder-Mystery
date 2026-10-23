@@ -125,6 +125,7 @@ const STATE = {
   clues: new Set(), asked: new Set(), broken: new Set(), topics: {},
   accused: null, accusation: null, supports: [],
   muted: false, auto: false, autoTimer: null, cheats: 0,
+  sealed: false, warned60: false,
   history: [],
   order: { inv: [], agents: [], statements: [] }
 };
@@ -149,13 +150,25 @@ function renderTimer() {
   const pct = STATE.secs / 1024 * 100;
   tbarFill.style.width = pct + "%";
   const danger = STATE.secs <= 120;
+  const critical = STATE.secs <= 60 && STATE.started && !STATE.ended;
   timerEl.classList.toggle("danger", danger);
+  timerEl.classList.toggle("critical", critical);
+  timerEl.classList.toggle("sealed", STATE.sealed);
   tbar.classList.toggle("danger", danger);
+  const sw = $("sysWarn");
+  if (sw) sw.classList.toggle("on", critical);
+  // 60 秒一次性警示（spend 可能跳过整数秒，故放这里而非 tick）
+  if (critical && !STATE.warned60) {
+    STATE.warned60 = true;
+    SFX.tick();
+    SFX.tone(392, 0.16, "square", 0.05);
+    SFX.tone(262, 0.3, "square", 0.05, 0.18);
+  }
 }
 function startTimer() {
   renderTimer();
   STATE.timerId = setInterval(() => {
-    if (!STATE.started || STATE.ended) return;
+    if (!STATE.started || STATE.ended || STATE.sealed) return;
     if (document.hidden) return;
     STATE.secs--;
     if (STATE.secs <= 0) { STATE.secs = 0; renderTimer(); ending("J"); return; }
@@ -165,7 +178,7 @@ function startTimer() {
   }, 1000);
 }
 function spend(sec) {
-  if (STATE.ended || !sec) return;
+  if (STATE.ended || STATE.sealed || !sec) return;
   STATE.secs = Math.max(0, STATE.secs - sec);
   renderTimer();
   const d = $("timerDelta");
@@ -341,8 +354,14 @@ function showChoices(list) {
     b.style.animationDelay = Math.min(i * 35, 280) + "ms";
     b.innerHTML = '<span class="idx">' + String(n).padStart(2, "0") + "</span>" +
       '<span class="lbl"></span>' +
+      (c.badge ? '<span class="badge"></span>' : "") +
       (c.cost ? '<span class="cost">' + (c.cost > 0 ? "-" + c.cost + "s" : "") + "</span>" : "");
     b.querySelector(".lbl").textContent = c.label;
+    if (c.badge) {
+      const bd = b.querySelector(".badge");
+      bd.textContent = c.badge.t;
+      if (c.badge.c) bd.classList.add(c.badge.c);
+    }
     b.addEventListener("click", (ev) => {
       ev.stopPropagation();
       choose(c);
@@ -483,6 +502,11 @@ function showHub() {
   } else {
     list.push({ label: "提交结案（至少 6 条线索，当前 " + n + " 条）", locked: true });
   }
+  // 逃生阀：时间所剩无几时，允许不计时直接结案——问得多不该被拖时间拖死
+  if (STATE.secs <= 120 && !STATE.sealed && n >= 6) {
+    list.push({ type: "header", label: "时间不多了" });
+    list.push({ label: "立即结案 · 不计时（保留现有线索）", end: true, action: sealCase });
+  }
   const hint = n >= 6
     ? "线索够拼出一个故事了。但你只有一次指认的机会。"
     : "你站在作战室中央。九名 Agent 都在等你的下一个问题。";
@@ -524,7 +548,7 @@ function agentMenu(id) {
   const d = DIALOGUE[id];
   const asked = STATE.topics[id] || (STATE.topics[id] = new Set());
   const list = d.topics.map((t) => ({
-    label: t.label, cost: 16, done: asked.has(t.id),
+    label: t.label, cost: 12, done: asked.has(t.id),
     action: () => askTopic(id, t)
   }));
   list.push({ label: "出示线索", action: () => openPresent(id) });
@@ -593,15 +617,37 @@ function resolvePresent(id, n) {
   }
 }
 
+/* ---------- 逃生阀：停止计时，直接进入结案 ---------- */
+function sealCase() {
+  if (STATE.sealed || STATE.ended) return;
+  STATE.sealed = true;
+  clearInterval(STATE.timerId);
+  STATE.timerId = null;
+  renderTimer();
+  SFX.tone(523, 0.12, "sine", 0.05);
+  SFX.tone(784, 0.2, "sine", 0.05, 0.12);
+  toast("计时已停止 · 从容结案");
+  showAccuse1();
+}
+
 /* ---------- 结案 ---------- */
 function showAccuse1() {
   showScene({
     bg: "red", portrait: null, instant: true,
     lines: [{ text: "十秒后，你要说出一个名字。说错，今晚就白熬了。" }],
-    choices: shuffle(AGENTS).map((a) => ({
-      label: "指认 " + a.id + " · " + a.duty,
-      action: () => { STATE.accused = a.id; showAccuse2(); }
-    })).concat([{ label: "再想想，返回作战室", action: showHub }])
+    choices: shuffle(AGENTS).map((a) => {
+      const broken = STATE.broken.has(a.id);
+      const asked = STATE.asked.has(a.id);
+      const badge = broken
+        ? { t: "破绽 ×1", c: "b-broken" }
+        : asked
+          ? { t: "已询问 ✓", c: "b-asked" }
+          : { t: "未询问", c: "b-none" };
+      return {
+        label: "指认 " + a.id + " · " + a.duty, badge,
+        action: () => { STATE.accused = a.id; showAccuse2(); }
+      };
+    }).concat([{ label: "再想想，返回作战室", action: showHub }])
   });
 }
 
@@ -620,8 +666,8 @@ function openSupport() {
   STATE.supports = [];
   const clues = shuffle([...STATE.clues]).map((n) => CLUE_MAP[n]);
   supportGrid.innerHTML = clues.map((c) =>
-    '<button class="support-card" data-n="' + c.no + '"><span class="no">C-' + String(c.no).padStart(2, "0") +
-    "</span>" + c.label + "</button>"
+    '<button class="support-card' + (c.weight >= 2 ? " key" : "") + '" data-n="' + c.no + '"><span class="no">C-' + String(c.no).padStart(2, "0") +
+    "</span>" + c.label + (c.weight >= 2 ? '<i class="key-dot"></i>' : "") + "</button>"
   ).join("");
   supportCount.textContent = "0";
   supportConfirm.disabled = true;
@@ -755,7 +801,7 @@ function showReport(id) {
   panel.querySelector("#btnCopy").onclick = copyText;
   panel.querySelector("#btnTruth").onclick = () => openTruth();
   panel.querySelector("#btnTruth2").onclick = () => openTruth();
-  panel.querySelector("#btnAgain").onclick = () => location.reload();
+  panel.querySelector("#btnAgain").onclick = restartGame;
 }
 
 function copyText() {
@@ -1058,6 +1104,42 @@ function openLog() {
 }
 
 /* ---------- 启动 / 事件 ---------- */
+/* ---------- 无刷新重开：重置 STATE 回序章，保留 localStorage 结局图鉴 ---------- */
+function restartGame() {
+  // 清理所有定时器，防止旧局的计时/打字/自动推进泄漏到新局
+  clearInterval(STATE.timerId);
+  clearInterval(STATE.typing);
+  clearTimeout(STATE.autoTimer);
+  // 重置状态（localStorage 由 unlockEndings 自行管理，此处不触碰）
+  STATE.started = false; STATE.ended = false; STATE.ending = null;
+  STATE.secs = 1024; STATE.scene = null; STATE.lineIndex = 0;
+  STATE.typing = null; STATE.lineDone = false;
+  STATE.clues = new Set(); STATE.asked = new Set(); STATE.broken = new Set(); STATE.topics = {};
+  STATE.accused = null; STATE.accusation = null; STATE.supports = [];
+  STATE.auto = false; STATE.cheats = 0;
+  STATE.sealed = false; STATE.warned60 = false;
+  STATE.history = [];
+  STATE.order = { inv: [], agents: [], statements: [] };
+  // UI 复位
+  closeOverlay();
+  supportOverlay.classList.remove("on");
+  setSpeaking(false);
+  portraitEl.classList.remove("in", "speaking", "avatar");
+  portraitEl.removeAttribute("src");
+  choicesEl.classList.remove("on");
+  choicesEl.innerHTML = "";
+  document.getElementById("stage").classList.remove("choosing");
+  const sw = $("sysWarn"); if (sw) sw.classList.remove("on");
+  timerEl.classList.remove("sealed", "critical", "danger");
+  tbar.classList.remove("danger");
+  $("btnAuto").textContent = "自动 OFF";
+  $("btnAuto").classList.remove("active");
+  $("hintAuto").classList.remove("on");
+  clueCountEl.textContent = "0 / " + CLUES.length;
+  // 重开不进标题页，直接回到序章第一幕
+  startGame();
+}
+
 function startGame() {
   if (STATE.started) return;
   STATE.started = true;

@@ -90,6 +90,19 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
   font-variant-numeric: tabular-nums; line-height: 1;
 }
 .timer.danger { color: var(--red); animation: heartbeat 1s ease-in-out infinite; }
+/* 最后 60 秒：放大 + 快闪 + 发光 */
+.timer.critical { color: #ff4b2f; font-size: 1.2em; text-shadow: 0 0 18px rgba(255,75,47,.5); animation: heartbeat .7s ease-in-out infinite; }
+/* 逃生阀触发后：计时停止的暗淡态 */
+.timer.sealed { color: var(--faint); text-shadow: none; animation: none; }
+/* 对话框顶部系统警示条 */
+.sys-warn {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 22;
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; color: #ffd2ca;
+  background: rgba(255,75,47,.16); border: 1px solid rgba(255,75,47,.5); border-top: none;
+  padding: 5px 16px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.sys-warn.on { opacity: 1; animation: hintPulse 1.6s ease-in-out infinite; }
 @keyframes heartbeat { 50% { opacity: .45; } }
 .tbar { width: 132px; height: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
 .tbar i { display: block; height: 100%; width: 100%; background: var(--ink); transition: width .4s linear, background .4s; }
@@ -229,6 +242,11 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 .choice .idx { font-family: var(--f-mono); font-size: 10px; color: var(--faint); letter-spacing: .1em; min-width: 20px; }
 .choice .lbl { flex: 1; }
 .choice .cost { font-family: var(--f-mono); font-size: 10px; color: var(--faint); letter-spacing: .08em; }
+/* 侦查状态徽标（指认界面） */
+.choice .badge { flex: none; font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .08em; color: var(--faint); padding: 2px 7px; border: 1px solid var(--line); white-space: nowrap; }
+.choice .badge.b-broken { color: #ff8a76; border-color: rgba(255,75,47,.55); background: rgba(255,75,47,.07); }
+.choice .badge.b-asked { color: #8fbf90; border-color: rgba(95,154,99,.45); }
+.choice .badge.b-none { opacity: .5; }
 .choice.locked { opacity: .38; pointer-events: none; }
 .choice.done { opacity: .42; }
 .choice.done .lbl { text-decoration: line-through; text-decoration-color: rgba(255,255,255,.3); }
@@ -380,11 +398,16 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 .support-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; color: var(--dim); }
 .support-bar b { color: var(--red); }
 .support-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
-.support-card { text-align: left; padding: 14px 16px; border: 1px solid var(--line); font-size: 13px; line-height: 1.55; transition: .18s; }
+.support-card { position: relative; text-align: left; padding: 14px 16px; border: 1px solid var(--line); font-size: 13px; line-height: 1.55; transition: .18s }
 .support-card:hover { border-color: rgba(255,255,255,.32); }
 .support-card.sel { border-color: var(--red); background: rgba(255,75,47,.08); }
 .support-card .no { font-family: var(--f-mono); font-size: 9.5px; color: var(--faint); letter-spacing: .14em; display: block; margin-bottom: 5px; }
 .support-card.sel .no { color: var(--red); }
+/* 关键线索（权重≥2）微弱标记 */
+.support-card.key { border-color: rgba(255,75,47,.38); }
+.support-card .key-dot { position: absolute; left: 9px; bottom: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px rgba(255,75,47,.85); font-style: normal; }
+.support-card.sel .key-dot { box-shadow: 0 0 10px rgba(255,255,255,.5); }
+.key-legend { color: var(--red); }
 .accuse-btn { margin-top: 20px; width: 100%; padding: 16px; border: 1px solid var(--red); color: #ffd2ca; background: rgba(255,75,47,.08); font-size: 14px; letter-spacing: .2em; transition: .2s; }
 .accuse-btn:disabled { opacity: .3; pointer-events: none; }
 .accuse-btn:hover { background: var(--red); color: #fff; }

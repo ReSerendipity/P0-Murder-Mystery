@@ -67,6 +67,7 @@
 
   <!-- 对话框 -->
   <div class="dialogue" id="dialogue">
+    <div class="sys-warn" id="sysWarn">⚠ 时间即将耗尽 · 超时将自动结案</div>
     <div class="dlg-inner">
       <div class="name-row">
         <div class="nameplate" id="nameplate"></div>
@@ -140,7 +141,7 @@
         <button class="x" id="supportClose">×</button>
       </div>
       <div class="panel-body">
-        <div class="support-bar">已选 <b id="supportCount">0</b> / 3 · 线索越完整，结案评级越高</div>
+        <div class="support-bar">已选 <b id="supportCount">0</b> / 3 · 线索分量影响评级（<b class="key-legend">●</b> = 关键）</div>
         <div class="support-grid" id="supportGrid"></div>
         <button class="accuse-btn" id="supportConfirm" disabled>提 交 结 案</button>
       </div>
