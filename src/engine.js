@@ -245,6 +245,32 @@ const SFX = {
   },
   select() {                                          // 进入支撑线索选择：确认音
     this.tone(660, 0.05, "sine", 0.03);
+  },
+  closePanel() {                                       // 关闭面板：柔和下行 + 轻噪，给用户明确"合上"反馈
+    if (!this.ctx || this.muted) return;
+    this.tone(420, 0.07, "sine", 0.022, 240);
+    this.noise(0.06, 0.018, 1600, 0.9);
+  },
+  reportOpen() {                                       // 打开结案复盘：档案抽出的沙沙声 + 低沉确认音
+    if (!this.ctx || this.muted) return;
+    this.noise(0.14, 0.03, 1500, 0.7);
+    this.tone(392, 0.12, "sine", 0.03, 294);
+  },
+  lineCue() {                                          // 推进到下一句：极轻的"翻页"提示，区别于逐字 tick
+    this.tone(560, 0.035, "triangle", 0.016, 700);
+  },
+  transition() {                                       // 场景切换：上扫 whoosh，标记进入新段落
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(); o.type = "sine";
+    o.frequency.setValueAtTime(180, t);
+    o.frequency.exponentialRampToValueAtTime(620, t + 0.3);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.025, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + 0.38);
   }
 };
 
@@ -467,6 +493,7 @@ function advance() {
   if (STATE.lineIndex < s.lines.length - 1) {
     STATE.lineIndex++;
     const ln = s.lines[STATE.lineIndex];
+    SFX.lineCue();
     renderLine(ln, false);
   } else if (!choicesEl.classList.contains("on")) {
     showChoices(s.choices);
@@ -534,6 +561,7 @@ function choose(c) {
 
 /* ---------- 序章 ---------- */
 function showPrologue(i) {
+  SFX.transition();
   const p = PROLOGUE[i];
   const choices = i === 0
     ? [
@@ -555,6 +583,7 @@ function showPrologue(i) {
 
 /* ---------- 白话简报 ---------- */
 function showBrief() {
+  SFX.transition();
   showScene({
     bg: "room",
     portrait: null,
@@ -899,6 +928,7 @@ const ROOT_CAUSE = {
 };
 
 function showReport(id) {
+  SFX.reportOpen();
   const e = ENDINGS[id];
   setPortrait(null);
   const used = 1024 - STATE.secs;
@@ -1189,6 +1219,7 @@ function openTruth() {
 
 /* ---------- 覆盖层 ---------- */
 function closeOverlay() {
+  SFX.closePanel();
   overlay.classList.remove("on");
   supportOverlay.classList.remove("on");
 }
