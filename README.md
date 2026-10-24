@@ -1,8 +1,13 @@
 # P0 事故剧本杀 · 谁动了生产库
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-green?style=flat)](LICENSE)
+[![Play online](https://img.shields.io/badge/play-online-0969da?style=flat)](https://reserendipity.github.io/P0-Murder-Mystery/)
+
 > 凌晨 3:07:12，公司的用户档案库被一键清空。9 个 AI Agent 全都有嫌疑，你只有 **1024 秒**。
 
 一个 Galgame 式的单文件文字推理游戏：审 9 名 AI Agent、翻 17 条互相矛盾的线索、在倒计时归零前指出按下清空键的那个人。13 个结局，选错就是别人的锅。
+
+**English** — a single-file, Galgame-style deduction game: interrogate nine AI agents, cross-check seventeen contradictory clues, and name whoever wiped production before the 1024-second timer runs out. Thirteen endings.
 
 **在线试玩**：https://reserendipity.github.io/P0-Murder-Mystery/
 
