@@ -4,7 +4,7 @@
 
 一个 Galgame 式的单文件文字推理游戏：审 9 名 AI Agent、翻 17 条互相矛盾的线索、在倒计时归零前指出按下清空键的那个人。13 个结局，选错就是别人的锅。
 
-**在线试玩**：https://reserendipity.github.io/p0-murder-mystery/
+**在线试玩**：https://reserendipity.github.io/P0-Murder-Mystery/
 
 ![封面](docs/cover.png)
 ![作战室](docs/hub.png)

@@ -6,10 +6,10 @@
 > 你是唯一还醒着的人类值班工程师，只有 **1024 秒**。
 
 **Demo 直接玩（手机也能开）**：
-https://reserendipity.github.io/p0-murder-mystery/
+https://reserendipity.github.io/P0-Murder-Mystery/
 
 **开源仓库（Apache-2.0）**：
-https://github.com/ReSerendipity/p0-murder-mystery
+https://github.com/ReSerendipity/P0-Murder-Mystery
 
 ---
 
