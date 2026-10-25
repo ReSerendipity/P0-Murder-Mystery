@@ -1,4 +1,4 @@
-# P0 事故剧本杀 · 谁动了生产库
+# P0 事故剧本杀 · 谁动了档案库
 
 > 凌晨 3:07，用户档案库被一键清空。9 个 AI Agent 全都有嫌疑，你只有 **1024 秒**。
 
@@ -97,7 +97,7 @@ python3 build.py
 ### 使用示例
 
 - 想 5 分钟速通：开局直接「提交结案」（需 ≥6 条线索），体验指认与评级。
-- 想打真结局：把 7 个现场调查点全部走完（凑齐关键线索），指认「豆包」并选「她以为那是一间练习室在清理」，可得 S 级结局。
+- 想多周目收集：按剧本选择调查点、逐步审讯不同 Agent，解锁更多结局与完整真相档案。
 - 想给同事演示：直接发 GitHub Pages 链接，无需安装。
 
 ### FAQ
@@ -215,7 +215,7 @@ Source layout:
 ### Examples
 
 - Speedrun: submit the case early (needs ≥6 clues) to feel the accusation loop.
-- True ending: clear all 7 investigations, accuse "豆包", and choose "她以为那是一间练习室在清理" for the S-rank ending.
+- For replay: pick investigation scenes and interrogate different agents each run to unlock more endings and the full truth archive.
 - Demo to a coworker: just send the GitHub Pages link.
 
 ### FAQ
