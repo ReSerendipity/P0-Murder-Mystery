@@ -36,23 +36,23 @@
 
 **开场标题页**——事故日志、倒计时与值班 Agent 立绘，点「接手这个夜班」进入。
 
-![开场标题页](docs/assets/readme-p0-murder-mystery-1.png)
+![开场标题页](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-1.png)
 
 **作战室（剧本/调查选择）**——左半屏选择 7 个现场调查点与 9 名 Agent 询问项，右半屏为在场 Agent 立绘，顶部显示剩余秒数与线索进度。
 
-![作战室](docs/assets/readme-p0-murder-mystery-2.png)
+![作战室](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-2.png)
 
 **游戏内审讯**——向 Agent 提问后进入对话演出，立绘随角色切换，打字机逐句推进，顶栏显示已获线索。
 
-![游戏内审讯](docs/assets/readme-p0-murder-mystery-3.png)
+![游戏内审讯](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-3.png)
 
 **结案报告（结局）**——指认真凶并选够支撑线索后生成复盘：事故时间线、根因判断、责任分布与结案等级，可保存结案卡或解锁真相档案。
 
-![结案报告](docs/assets/readme-p0-murder-mystery-4.png)
+![结案报告](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-4.png)
 
 **移动端**——390px 宽度下单列布局，按钮大、可通勤时玩。
 
-![移动端](docs/assets/readme-p0-murder-mystery-5.png)
+![移动端](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-5.png)
 
 ### 快速开始
 
@@ -157,23 +157,23 @@ The whole game is plain HTML/CSS/JavaScript: all portraits are inlined as base64
 
 **Title screen** — incident log, countdown and on-call agent portrait; click the start button to begin.
 
-![Title screen](docs/assets/readme-p0-murder-mystery-1.png)
+![Title screen](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-1.png)
 
 **War room (scene/suspect selection)** — pick from 7 crime-scene investigations and 9 agent interviews; the right rail shows present agents, the top bar shows remaining seconds and clue progress.
 
-![War room](docs/assets/readme-p0-murder-mystery-2.png)
+![War room](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-2.png)
 
 **In-game interrogation** — ask a question and enter visual novel dialogue; portraits change per character, text types out line by line.
 
-![In-game interrogation](docs/assets/readme-p0-murder-mystery-3.png)
+![In-game interrogation](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-3.png)
 
 **Case report (ending)** — after naming the culprit and attaching 3 clues, a debrief is generated: incident timeline, root cause, responsibility map and grade. Save a verdict card or unlock the truth archive.
 
-![Case report](docs/assets/readme-p0-murder-mystery-4.png)
+![Case report](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-4.png)
 
 **Mobile** — single column at 390px, large buttons, playable on a commute.
 
-![Mobile](docs/assets/readme-p0-murder-mystery-5.png)
+![Mobile](https://gcore.jsdelivr.net/gh/ReSerendipity/P0-Murder-Mystery@main/docs/assets/readme-p0-murder-mystery-5.png)
 
 ### Quick start
 
