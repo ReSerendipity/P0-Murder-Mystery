@@ -9,6 +9,7 @@
 [![Top language](https://img.shields.io/github/languages/top/ReSerendipity/P0-Murder-Mystery?logo=html5&logoColor=white)](https://github.com/ReSerendipity/P0-Murder-Mystery)
 [![Last commit](https://img.shields.io/github/last-commit/ReSerendipity/P0-Murder-Mystery)](https://github.com/ReSerendipity/P0-Murder-Mystery/commits/main)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ReSerendipity/P0-Murder-Mystery/issues)
+[![CI](https://github.com/ReSerendipity/P0-Murder-Mystery/actions/workflows/ci.yml/badge.svg)](https://github.com/ReSerendipity/P0-Murder-Mystery/actions/workflows/ci.yml)
 
 [中文](#中文) | [English](#english)
 

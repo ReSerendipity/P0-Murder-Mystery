@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 单文件构建与漂移门禁
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # build.py 把 src/（模板 + CSS + JS）与 assets/portraits/*.webp 打包成
+      # 单文件 HTML：index.html（GitHub Pages 入口）与 P0事故剧本杀.html。
+      - name: python build.py（重建单文件 HTML）
+        run: python build.py
+
+      # 构建是确定性的（本地验证：重建产物与已提交文件逐字节一致）。
+      # 因此可以卡漂移：改了 src/ 却忘记重建就提交，这里直接判红。
+      - name: 漂移门禁（index.html 必须与 src/ 同步）
+        run: |
+          if [ -n "$(git status --porcelain -- index.html 'P0事故剧本杀.html')" ]; then
+            echo "::error::index.html / P0事故剧本杀.html 与 src/ 不一致——改了 src/ 后请重新运行 python build.py 再提交"
+            git diff --stat -- index.html 'P0事故剧本杀.html'
+            exit 1
+          fi
+          echo "DRIFT_OK"
+
+      - name: smoke (static server + HTTP 200)
+        run: |
+          python3 -m http.server 4173 >/dev/null 2>&1 & SRV=$!
+          sleep 1
+          curl -sf http://127.0.0.1:4173/index.html >/dev/null && echo SMOKE_OK || { kill $SRV; exit 1; }
+          kill $SRV
