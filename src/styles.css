@@ -296,7 +296,8 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 }
 .btn-start:hover { background: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 0 40px rgba(255,75,47,.25); }
 .title-note { font-family: var(--f-mono); font-size: 10px; color: var(--faint); letter-spacing: .16em; }
-.title-foot { position: absolute; bottom: 26px; left: 8vw; right: 8vw; display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .18em; color: #3d4148; }
+.title-foot { position: absolute; bottom: 26px; left: 8vw; right: 8vw; display: flex; flex-wrap: wrap; justify-content: space-between; font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .18em; color: #3d4148; }
+.title-credit { width: 100%; margin-top: 6px; font-size: 9px; line-height: 1.6; letter-spacing: .06em; color: var(--faint); }
 
 /* ===== 覆盖层 / 抽屉 ===== */
 .overlay {
@@ -1030,6 +1031,11 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 .brief-sub {
   font-family: var(--f-mono); font-size: 10px; letter-spacing: .22em;
   color: var(--faint); margin-bottom: 12px;
+}
+.brief-credit {
+  margin: 18px 0 0; padding: 12px 14px;
+  border: 1px solid var(--line); background: rgba(255,255,255,.012);
+  font-size: 11px; line-height: 1.9; color: var(--faint);
 }
 .brief-actions { display: flex; gap: 12px; margin-top: 22px; }
 @media (max-width: 900px) {

@@ -634,6 +634,7 @@ function openBriefPanel(fromTitle) {
         '<div class="g-plain">' + g.p + "</div>" +
         '<div class="g-analogy">≈ ' + g.a + "</div></div>").join("") +
       "</div>" +
+      '<div class="brief-credit">素材与授权：代码以 Apache-2.0 开源；9 张角色立绘为第三方同人二创素材，版权归原作者，不包含在 Apache-2.0 授权范围内，仅用于本演示。商用或再分发请替换为自有立绘。</div>' +
       '<div class="brief-actions">' +
         '<button class="btn primary" id="briefStart">知道了，开始查案</button>' +
         '<button class="btn" id="briefClose">先等等</button>' +
