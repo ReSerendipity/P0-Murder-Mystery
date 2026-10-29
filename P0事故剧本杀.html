@@ -1056,6 +1056,36 @@ button { font-family: inherit; color: inherit; background: none; border: 0; curs
 /* 覆盖层必须高于封面，否则标题页打不开面板 */
 #overlay, #supportOverlay { z-index: 66; }
 
+/* ===== 安全区：小工具容器注入 --safe-area-inset-*，真机用 env() 兜底 ===== */
+:root { --topbar-pt: 16px; --title-foot-bottom: 26px; --dialogue-pb: 26px; }
+@media (max-width: 900px) { :root { --topbar-pt: 8px; --title-foot-bottom: 18px; } }
+@media (max-height: 640px) { :root { --topbar-pt: 8px; } }
+@media (max-height: 500px) { :root { --dialogue-pb: 10px; } }
+
+.topbar {
+  padding-top: calc(var(--topbar-pt, 16px) + var(--safe-area-inset-top, 0px));
+  padding-top: calc(var(--topbar-pt, 16px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
+}
+.dialogue {
+  padding-bottom: calc(var(--dialogue-pb, 26px) + var(--safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--dialogue-pb, 26px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+}
+.title-foot {
+  bottom: calc(var(--title-foot-bottom, 26px) + var(--safe-area-inset-bottom, 0px));
+  bottom: calc(var(--title-foot-bottom, 26px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+}
+.toast {
+  top: calc(84px + var(--safe-area-inset-top, 0px));
+  top: calc(84px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
+}
+.title-screen::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0;
+  height: var(--safe-area-inset-top, 0px);
+  height: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  background: linear-gradient(180deg, rgba(7,8,10,.98), rgba(7,8,10,0));
+  z-index: 3; pointer-events: none;
+}
+
 </style>
 </head>
 <body>
